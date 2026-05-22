@@ -171,6 +171,9 @@ modified.
 - This policy is strict by default.
 - This role installs the operating-system Fail2Ban package, manages local
   Fail2Ban configuration, and validates the Fail2Ban command-line tools.
+- When adding a new accepted shape for role variables, validate the item-level
+  contract before templates consume it and add a negative role-validation test
+  for malformed inputs.
 - The default validation path is local Docker through Workspace. Do not add
   cloud provider resources unless the role grows behavior that genuinely
   requires end-to-end cloud validation.

@@ -42,6 +42,26 @@
           maxretry: 3
           port: ssh
   tasks:
+    - name: Assert malformed list-style jails fail role validation
+      block:
+        - name: Run Fail2Ban role with malformed list-style jails
+          ansible.builtin.include_role:
+            name: ansible-fail2ban
+          vars:
+            fail2ban_jails:
+              - config:
+                  enabled: false
+
+        - name: Fail when malformed list-style jails are accepted
+          ansible.builtin.fail:
+            msg: Malformed list-style jail definitions should fail validation.
+      rescue:
+        - name: Assert malformed list-style jails fail before rendering
+          ansible.builtin.assert:
+            that:
+              - ansible_failed_task.name == 'Validate list-style Fail2Ban jail definitions'
+            quiet: true
+
     - name: Run Fail2Ban role with mapping-style jails
       ansible.builtin.include_role:
         name: ansible-fail2ban
@@ -74,6 +94,7 @@
       ansible.builtin.include_tasks: tasks/test_tasks.yml
       vars:
         fail2ban_test_expected_jail_lines:
+          - "[sshd]"
           - "[ssh-rich]"
           - "enabled = false"
           - "filter = sshd"

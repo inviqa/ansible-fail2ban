@@ -125,7 +125,7 @@ reference.
 | `fail2ban_usedns` | `warn` | Fail2Ban DNS handling mode. |
 | `fail2ban_banaction` | `iptables-multiport` | Default banning action. |
 | `fail2ban_default_action` | `%(action_)s` | Default Fail2Ban action interpolation. |
-| `fail2ban_jails` | `{}` | Mapping of jail names to option mappings, or a list of jail objects with `name` and `config`, rendered into `jail.local`. |
+| `fail2ban_jails` | `{}` | Mapping of jail names to option mappings, or a list of jail objects with non-empty `name` and mapping `config` values, rendered into `jail.local`. |
 | `fail2ban_custom_filters` | `[]` | Optional custom filter templates to render into `filter.d`. |
 | `fail2ban_custom_actions` | `[]` | Optional custom action templates to render into `action.d`. |
 | `fail2ban_manage_service` | `true` | Manage the Fail2Ban service after configuration. |
@@ -201,7 +201,7 @@ stays operator-controlled:
 ```
 
 Use list-style jail definitions when a jail needs nested filter or action
-objects:
+objects. Each list entry must define a non-empty `name` and a `config` mapping:
 
 ```yaml
 ---
