@@ -125,7 +125,7 @@ reference.
 | `fail2ban_usedns` | `warn` | Fail2Ban DNS handling mode. |
 | `fail2ban_banaction` | `iptables-multiport` | Default banning action. |
 | `fail2ban_default_action` | `%(action_)s` | Default Fail2Ban action interpolation. |
-| `fail2ban_jails` | `{}` | Mapping of jail names to option mappings rendered into `jail.local`. |
+| `fail2ban_jails` | `{}` | Mapping of jail names to option mappings, or a list of jail objects with `name` and `config`, rendered into `jail.local`. |
 | `fail2ban_custom_filters` | `[]` | Optional custom filter templates to render into `filter.d`. |
 | `fail2ban_custom_actions` | `[]` | Optional custom action templates to render into `action.d`. |
 | `fail2ban_manage_service` | `true` | Manage the Fail2Ban service after configuration. |
@@ -198,6 +198,35 @@ stays operator-controlled:
             logpath: /var/log/auth.log
             maxretry: 6
             port: ssh
+```
+
+Use list-style jail definitions when a jail needs nested filter or action
+objects:
+
+```yaml
+---
+- name: Install Fail2Ban with a rich SSH jail definition
+  hosts: linux_devices
+  become: true
+  roles:
+    - role: inviqa.fail2ban
+      vars:
+        fail2ban_jails:
+          - name: ssh-rich
+            config:
+              enabled: true
+              filter:
+                name: sshd
+              actions:
+                - action:
+                    name: iptables-multiport
+                  args:
+                    name: ssh-rich
+                    port: ssh
+                    protocol: tcp
+              logpath: /var/log/auth.log
+              maxretry: 3
+              port: ssh
 ```
 
 For local checkout testing before Galaxy publication, use the local role name
