@@ -1,5 +1,26 @@
 # CHANGELOG
 
+## [0.2.0] - 2026-05-22
+
+### Role Changes
+
+- Added richer `jail.local` rendering for list-style jail definitions with
+  nested filter and action objects.
+- Added item-level validation for list-style jail definitions before rendering.
+
+### Test Harness
+
+- Added Docker test coverage for both mapping-style and list-style jail
+  definitions.
+- Added negative Docker test coverage for malformed list-style jail definitions.
+
+### Documentation Changes
+
+- Documented rich Fail2Ban jail rendering examples.
+- Documented the required list-style jail object shape.
+- Added agent guidance for validating new role variable shapes before templates
+  consume them.
+
 ## [0.1.0] - 2026-05-22
 
 ### Role

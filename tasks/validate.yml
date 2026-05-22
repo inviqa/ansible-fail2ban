@@ -17,7 +17,7 @@
       - fail2ban_jail_local_path is string
       - fail2ban_jail_local_path | length > 0
       - fail2ban_ignoreip is sequence
-      - fail2ban_jails is mapping
+      - fail2ban_jails is mapping or (fail2ban_jails is sequence and fail2ban_jails is not string)
       - fail2ban_custom_filters is sequence
       - fail2ban_custom_actions is sequence
       - fail2ban_service_name is string
@@ -29,5 +29,27 @@
     fail_msg: >-
       Set Fail2Ban package, configuration, service, and verification settings
       to valid values. Package state must be present or latest, apt cache
-      validity must be a non-negative integer, jails must be a mapping, and
-      custom filter/action definitions must be lists.
+      validity must be a non-negative integer, jails must be a mapping or list,
+      and custom filter/action definitions must be lists.
+
+- name: Validate list-style Fail2Ban jail definitions
+  ansible.builtin.assert:
+    that:
+      - item is mapping
+      - item.name is defined
+      - item.name is string
+      - item.name | length > 0
+      - item.config is defined
+      - item.config is mapping
+    quiet: true
+    fail_msg: >-
+      List-style Fail2Ban jail definitions must be mappings with a non-empty
+      name and a config mapping.
+  loop: >-
+    {{
+      fail2ban_jails
+      if fail2ban_jails is sequence
+      and fail2ban_jails is not string
+      and fail2ban_jails is not mapping
+      else []
+    }}

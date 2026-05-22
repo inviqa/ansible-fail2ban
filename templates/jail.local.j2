@@ -1,4 +1,45 @@
-# {{ ansible_managed }}
+{%- macro render_scalar(value) -%}
+{%- if value is sameas true -%}
+true
+{%- elif value is sameas false -%}
+false
+{%- elif value is mapping and value.name is defined -%}
+{{ value.name }}
+{%- elif value is sequence and value is not string and value is not mapping -%}
+{{ value | join(' ') }}
+{%- else -%}
+{{ value }}
+{%- endif -%}
+{%- endmacro -%}
+{%- macro render_action(action_config) -%}
+{%- if action_config is string -%}
+{{ action_config }}
+{%- elif action_config is mapping -%}
+{%- set action_value = action_config.action | default(action_config) -%}
+{%- if action_value is mapping and action_value.name is defined -%}
+{%- set action_name = action_value.name -%}
+{%- else -%}
+{%- set action_name = action_value -%}
+{%- endif -%}
+{%- set action_args = action_config.args | default({}) -%}
+{{ action_name }}{% if action_args is mapping and action_args | length > 0 %} [{% for arg, val in action_args | dictsort %}{{ arg }}={{ render_scalar(val) }}{% if not loop.last %},{% endif %}{% endfor %}]{% endif %}
+{%- else -%}
+{{ action_config }}
+{%- endif -%}
+{%- endmacro -%}
+{% macro render_jail(jail_name, jail_config) %}
+{% set jail_options = jail_config.config | default(jail_config) %}
+[{{ jail_name }}]
+{% for option, value in jail_options | dictsort %}
+{% if option == 'actions' and value is sequence and value is not string %}
+action = {% for action_config in value %}{{ render_action(action_config) }}{% if not loop.last %}
+         {% endif %}{% endfor %}{{ '\n' }}
+{% else %}
+{{ 'action' if option == 'actions' else option }} = {{ render_scalar(value) }}
+{% endif %}
+{% endfor %}
+{% endmacro %}
+{{ '# ' ~ ansible_managed }}
 
 [DEFAULT]
 ignoreip = {{ fail2ban_ignoreip | join(' ') }}
@@ -15,18 +56,14 @@ mta = {{ fail2ban_mta }}
 protocol = {{ fail2ban_protocol }}
 chain = {{ fail2ban_chain }}
 action = {{ fail2ban_default_action }}
+{% if fail2ban_jails is mapping %}
 {% for jail_name, jail_config in fail2ban_jails | dictsort %}
 
-[{{ jail_name }}]
-{% for option, value in jail_config | dictsort %}
-{% if value is sameas true -%}
-{{ option }} = true
-{% elif value is sameas false -%}
-{{ option }} = false
-{% elif value is sequence and value is not string -%}
-{{ option }} = {{ value | join(' ') }}
-{% else -%}
-{{ option }} = {{ value }}
-{% endif -%}
+{{ render_jail(jail_name, jail_config) }}
 {% endfor %}
+{% else %}
+{% for jail in fail2ban_jails %}
+
+{{ render_jail(jail.name, jail.config) }}
 {% endfor %}
+{% endif %}

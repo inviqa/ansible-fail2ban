@@ -11,18 +11,63 @@
   hosts: fail2ban_test_hosts
   vars:
     fail2ban_pkg_install_latest: "false"
-    fail2ban_jails:
+    fail2ban_mapping_jails:
       sshd:
         enabled: false
         filter: sshd
         logpath: /var/log/secure
         maxretry: 6
         port: ssh
+    fail2ban_list_jails:
+      - name: sshd
+        config:
+          enabled: false
+          filter: sshd
+          logpath: /var/log/secure
+          maxretry: 6
+          port: ssh
+      - name: ssh-rich
+        config:
+          enabled: false
+          filter:
+            name: sshd
+          actions:
+            - action:
+                name: iptables-multiport
+              args:
+                name: ssh-rich
+                port: ssh
+                protocol: tcp
+          logpath: /var/log/auth.log
+          maxretry: 3
+          port: ssh
   tasks:
-    - name: Run Fail2Ban role
+    - name: Assert malformed list-style jails fail role validation
+      block:
+        - name: Run Fail2Ban role with malformed list-style jails
+          ansible.builtin.include_role:
+            name: ansible-fail2ban
+          vars:
+            fail2ban_jails:
+              - config:
+                  enabled: false
+
+        - name: Fail when malformed list-style jails are accepted
+          ansible.builtin.fail:
+            msg: Malformed list-style jail definitions should fail validation.
+      rescue:
+        - name: Assert malformed list-style jails fail before rendering
+          ansible.builtin.assert:
+            that:
+              - ansible_failed_task.name == 'Validate list-style Fail2Ban jail definitions'
+            quiet: true
+
+    - name: Run Fail2Ban role with mapping-style jails
       ansible.builtin.include_role:
         name: ansible-fail2ban
         public: true
+      vars:
+        fail2ban_jails: "{{ fail2ban_mapping_jails }}"
 
     - name: Assert compatibility switch keeps present package state
       ansible.builtin.assert:
@@ -30,5 +75,27 @@
           - fail2ban_package_state == 'present'
         quiet: true
 
-    - name: Run Fail2Ban behavior validation tasks
+    - name: Run mapping-style Fail2Ban behavior validation tasks
       ansible.builtin.include_tasks: tasks/test_tasks.yml
+      vars:
+        fail2ban_test_expected_jail_lines:
+          - "[sshd]"
+          - "enabled = false"
+          - "filter = sshd"
+
+    - name: Run Fail2Ban role with list-style jails
+      ansible.builtin.include_role:
+        name: ansible-fail2ban
+        public: true
+      vars:
+        fail2ban_jails: "{{ fail2ban_list_jails }}"
+
+    - name: Run list-style Fail2Ban behavior validation tasks
+      ansible.builtin.include_tasks: tasks/test_tasks.yml
+      vars:
+        fail2ban_test_expected_jail_lines:
+          - "[sshd]"
+          - "[ssh-rich]"
+          - "enabled = false"
+          - "filter = sshd"
+          - "action = iptables-multiport [name=ssh-rich,port=ssh,protocol=tcp]"

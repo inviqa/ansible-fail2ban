@@ -22,9 +22,16 @@
     that:
       - "'[DEFAULT]' in fail2ban_test_rendered_jail_local"
       - "'ignoreip = 127.0.0.1/8 ::1' in fail2ban_test_rendered_jail_local"
-      - "'[sshd]' in fail2ban_test_rendered_jail_local"
-      - "'enabled = false' in fail2ban_test_rendered_jail_local"
     quiet: true
+  vars:
+    fail2ban_test_rendered_jail_local: "{{ fail2ban_test_jail_local_content.content | b64decode }}"
+
+- name: Assert Fail2Ban jail.local contains expected jail lines
+  ansible.builtin.assert:
+    that:
+      - item in fail2ban_test_rendered_jail_local
+    quiet: true
+  loop: "{{ fail2ban_test_expected_jail_lines }}"
   vars:
     fail2ban_test_rendered_jail_local: "{{ fail2ban_test_jail_local_content.content | b64decode }}"
 
