@@ -1,0 +1,8 @@
+---
+- name: Remove Fail2Ban test container
+  community.docker.docker_container:
+    name: "{{ hostvars[item].ansible_host }}"
+    state: absent
+    force_kill: true
+  loop: "{{ groups['fail2ban_test_hosts'] }}"
+  when: hostvars[item].fail2ban_test_provision_containers | default(false) | bool

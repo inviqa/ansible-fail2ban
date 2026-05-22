@@ -1,0 +1,33 @@
+---
+- name: Validate Fail2Ban package settings
+  ansible.builtin.assert:
+    that:
+      - fail2ban_package_name is string
+      - fail2ban_package_name | length > 0
+      - fail2ban_package_state in ['present', 'latest']
+      - fail2ban_epel_package_name is string
+      - fail2ban_epel_package_name | length > 0
+      - (fail2ban_apt_cache_valid_time | string) is match('^[0-9]+$')
+      - fail2ban_config_dir is string
+      - fail2ban_config_dir | length > 0
+      - fail2ban_filter_dir is string
+      - fail2ban_filter_dir | length > 0
+      - fail2ban_action_dir is string
+      - fail2ban_action_dir | length > 0
+      - fail2ban_jail_local_path is string
+      - fail2ban_jail_local_path | length > 0
+      - fail2ban_ignoreip is sequence
+      - fail2ban_jails is mapping
+      - fail2ban_custom_filters is sequence
+      - fail2ban_custom_actions is sequence
+      - fail2ban_service_name is string
+      - fail2ban_service_name | length > 0
+      - fail2ban_service_state in ['started', 'stopped', 'restarted', 'reloaded']
+      - fail2ban_client_command is string
+      - fail2ban_client_command | length > 0
+    quiet: true
+    fail_msg: >-
+      Set Fail2Ban package, configuration, service, and verification settings
+      to valid values. Package state must be present or latest, apt cache
+      validity must be a non-negative integer, jails must be a mapping, and
+      custom filter/action definitions must be lists.

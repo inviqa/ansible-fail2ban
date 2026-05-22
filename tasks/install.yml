@@ -1,0 +1,22 @@
+---
+- name: Update apt cache for Fail2Ban package
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: "{{ fail2ban_apt_cache_valid_time }}"
+  when:
+    - ansible_facts["pkg_mgr"] == "apt"
+    - fail2ban_apt_update_cache | bool
+
+- name: Install EPEL repository package for Fail2Ban
+  ansible.builtin.package:
+    name: "{{ fail2ban_epel_package_name }}"
+    state: present
+  when:
+    - ansible_facts["os_family"] == "RedHat"
+    - fail2ban_epel_enabled | bool
+
+- name: Install Fail2Ban package
+  ansible.builtin.package:
+    name: "{{ fail2ban_package_name }}"
+    state: "{{ fail2ban_package_state }}"
+  notify: Restart fail2ban

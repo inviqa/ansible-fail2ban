@@ -1,0 +1,32 @@
+---
+name: ansible-fail2ban
+services:
+  console:
+    user: root
+    build:
+      context: .
+      dockerfile: Dockerfile
+      pull: true
+    command:
+      - sleep
+      - infinity
+    group_add:
+      - "0"
+      - "${HOST_DOCKER_GID:-1}"
+    working_dir: /app
+    environment:
+      ANSIBLE_HOME: /home/ansible/.ansible
+      ANSIBLE_COLLECTIONS_PATH: /home/ansible/.ansible/collections:/usr/share/ansible/collections
+      ANSIBLE_FORCE_COLOR: "false"
+      ANSIBLE_ROLES_PATH: /app/tests/roles:/home/ansible/.ansible/roles
+    volumes:
+      - ${HOST_DOCKER_SOCK:-/var/run/docker.sock}:/var/run/docker.sock
+      - .:/app
+  jenkins-lint:
+    build:
+      context: .
+      dockerfile: Dockerfile.jenkins-lint
+    environment:
+      JAVA_OPTS: -Djenkins.install.runSetupWizard=false
+    expose:
+      - "8080"

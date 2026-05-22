@@ -1,0 +1,27 @@
+[local]
+localhost ansible_connection=local
+
+[local:vars]
+ansible_python_interpreter=/usr/local/bin/python3
+
+[debian]
+fail2ban-debian13 ansible_host=fail2ban-debian13 ansible_connection=docker fail2ban_test_container_image=geerlingguy/docker-debian13-ansible:latest
+fail2ban-debian12 ansible_host=fail2ban-debian12 ansible_connection=docker fail2ban_test_container_image=geerlingguy/docker-debian12-ansible:latest
+
+[redhat]
+fail2ban-rocky10 ansible_host=fail2ban-rocky10 ansible_connection=docker fail2ban_test_container_image=geerlingguy/docker-rockylinux10-ansible:latest
+fail2ban-rocky9 ansible_host=fail2ban-rocky9 ansible_connection=docker fail2ban_test_container_image=geerlingguy/docker-rockylinux9-ansible:latest
+
+[ubuntu]
+fail2ban-ubuntu2604 ansible_host=fail2ban-ubuntu2604 ansible_connection=docker fail2ban_test_container_image=geerlingguy/docker-ubuntu2604-ansible:latest
+fail2ban-ubuntu2404 ansible_host=fail2ban-ubuntu2404 ansible_connection=docker fail2ban_test_container_image=geerlingguy/docker-ubuntu2404-ansible:latest
+
+[fail2ban_test_hosts:children]
+debian
+redhat
+ubuntu
+
+[fail2ban_test_hosts:vars]
+ansible_python_interpreter=/usr/bin/python3
+ansible_user=root
+fail2ban_test_provision_containers=true

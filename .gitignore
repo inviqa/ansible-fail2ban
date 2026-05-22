@@ -1,0 +1,10 @@
+*.retry
+*.log
+*.override.yml
+*.override.yaml
+.ansible/
+.DS_Store
+.my127ws/
+tests/.vagrant/
+tests/test_variables
+tests/test_variables.yml

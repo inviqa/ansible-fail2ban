@@ -1,0 +1,41 @@
+---
+- name: Ensure Fail2Ban configuration directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - "{{ fail2ban_config_dir }}"
+    - "{{ fail2ban_filter_dir }}"
+    - "{{ fail2ban_action_dir }}"
+
+- name: Render Fail2Ban jail.local
+  ansible.builtin.template:
+    src: jail.local.j2
+    dest: "{{ fail2ban_jail_local_path }}"
+    owner: "{{ fail2ban_jail_local_owner }}"
+    group: "{{ fail2ban_jail_local_group }}"
+    mode: "{{ fail2ban_jail_local_mode }}"
+  notify: Restart fail2ban
+
+- name: Render custom Fail2Ban filter templates
+  ansible.builtin.template:
+    src: "{{ item.template }}"
+    dest: "{{ item.dest | default(fail2ban_filter_dir ~ '/' ~ item.name ~ '.conf') }}"
+    owner: "{{ item.owner | default('root') }}"
+    group: "{{ item.group | default('root') }}"
+    mode: "{{ item.mode | default('0644') }}"
+  loop: "{{ fail2ban_custom_filters }}"
+  notify: Restart fail2ban
+
+- name: Render custom Fail2Ban action templates
+  ansible.builtin.template:
+    src: "{{ item.template }}"
+    dest: "{{ item.dest | default(fail2ban_action_dir ~ '/' ~ item.name ~ '.conf') }}"
+    owner: "{{ item.owner | default('root') }}"
+    group: "{{ item.group | default('root') }}"
+    mode: "{{ item.mode | default('0644') }}"
+  loop: "{{ fail2ban_custom_actions }}"
+  notify: Restart fail2ban

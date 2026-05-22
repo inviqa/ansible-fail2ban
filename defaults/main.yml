@@ -1,0 +1,49 @@
+---
+fail2ban_package_name: fail2ban
+fail2ban_pkg_install_latest: false
+fail2ban_package_state: "{{ 'latest' if fail2ban_pkg_install_latest | bool else 'present' }}"
+
+fail2ban_epel_enabled: "{{ ansible_facts['distribution'] in ['AlmaLinux', 'CentOS', 'RedHat', 'Rocky'] }}"
+fail2ban_epel_package_name: epel-release
+
+fail2ban_apt_update_cache: true
+fail2ban_apt_cache_valid_time: 3600
+
+fail2ban_config_dir: /etc/fail2ban
+fail2ban_filter_dir: "{{ fail2ban_config_dir }}/filter.d"
+fail2ban_action_dir: "{{ fail2ban_config_dir }}/action.d"
+
+fail2ban_jail_local_path: "{{ fail2ban_config_dir }}/jail.local"
+fail2ban_jail_local_owner: root
+fail2ban_jail_local_group: root
+fail2ban_jail_local_mode: "0644"
+
+fail2ban_default_ignoreip:
+  - 127.0.0.1/8
+  - ::1
+fail2ban_ignoreip: "{{ fail2ban_default_ignoreip }}"
+fail2ban_bantime: 600
+fail2ban_findtime: 600
+fail2ban_maxretry: 5
+fail2ban_backend: auto
+fail2ban_usedns: warn
+fail2ban_dest_email: root@localhost
+fail2ban_sender_email: fail2ban@localhost
+fail2ban_sender_name: Fail2Ban
+fail2ban_banaction: iptables-multiport
+fail2ban_mta: sendmail
+fail2ban_protocol: tcp
+fail2ban_chain: INPUT
+fail2ban_default_action: "%(action_)s"
+
+fail2ban_jails: {}
+fail2ban_custom_filters: []
+fail2ban_custom_actions: []
+
+fail2ban_manage_service: true
+fail2ban_service_name: fail2ban
+fail2ban_service_enabled: true
+fail2ban_service_state: started
+
+fail2ban_verify_install: true
+fail2ban_client_command: fail2ban-client

@@ -1,0 +1,21 @@
+---
+- name: Validate Fail2Ban role inputs
+  ansible.builtin.include_tasks: validate.yml
+
+- name: Install Fail2Ban package
+  ansible.builtin.include_tasks: install.yml
+
+- name: Configure Fail2Ban
+  ansible.builtin.include_tasks: configure.yml
+
+- name: Manage Fail2Ban service
+  ansible.builtin.include_tasks: service.yml
+  when: fail2ban_manage_service | bool
+
+- name: Apply pending Fail2Ban handlers before verification
+  ansible.builtin.meta: flush_handlers
+  when: fail2ban_manage_service | bool
+
+- name: Verify Fail2Ban command-line tools
+  ansible.builtin.include_tasks: verify.yml
+  when: fail2ban_verify_install | bool

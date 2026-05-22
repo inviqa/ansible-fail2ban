@@ -1,0 +1,34 @@
+---
+- name: Provision local Fail2Ban test containers
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Install test containers when inventory requests them
+      ansible.builtin.include_tasks: tasks/provision_containers.yml
+      when: groups.get('fail2ban_test_hosts', []) | length > 0
+
+- name: Validate Fail2Ban role on Linux targets
+  hosts: fail2ban_test_hosts
+  vars:
+    fail2ban_pkg_install_latest: "false"
+    fail2ban_jails:
+      sshd:
+        enabled: false
+        filter: sshd
+        logpath: /var/log/secure
+        maxretry: 6
+        port: ssh
+  tasks:
+    - name: Run Fail2Ban role
+      ansible.builtin.include_role:
+        name: ansible-fail2ban
+        public: true
+
+    - name: Assert compatibility switch keeps present package state
+      ansible.builtin.assert:
+        that:
+          - fail2ban_package_state == 'present'
+        quiet: true
+
+    - name: Run Fail2Ban behavior validation tasks
+      ansible.builtin.include_tasks: tasks/test_tasks.yml

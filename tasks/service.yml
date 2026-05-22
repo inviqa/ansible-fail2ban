@@ -1,0 +1,6 @@
+---
+- name: Manage Fail2Ban service
+  ansible.builtin.service:
+    name: "{{ fail2ban_service_name }}"
+    enabled: "{{ fail2ban_service_enabled | bool }}"
+    state: "{{ fail2ban_service_state }}"

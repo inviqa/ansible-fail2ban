@@ -1,0 +1,43 @@
+---
+- name: Check rendered Fail2Ban jail.local
+  ansible.builtin.stat:
+    path: "{{ fail2ban_jail_local_path }}"
+  register: fail2ban_test_jail_local
+
+- name: Assert Fail2Ban jail.local exists
+  ansible.builtin.assert:
+    that:
+      - fail2ban_test_jail_local.stat.exists
+      - fail2ban_test_jail_local.stat.pw_name == fail2ban_jail_local_owner
+      - fail2ban_test_jail_local.stat.gr_name == fail2ban_jail_local_group
+    quiet: true
+
+- name: Read Fail2Ban jail.local
+  ansible.builtin.slurp:
+    src: "{{ fail2ban_jail_local_path }}"
+  register: fail2ban_test_jail_local_content
+
+- name: Assert Fail2Ban jail.local contains expected defaults and test jail
+  ansible.builtin.assert:
+    that:
+      - "'[DEFAULT]' in fail2ban_test_rendered_jail_local"
+      - "'ignoreip = 127.0.0.1/8 ::1' in fail2ban_test_rendered_jail_local"
+      - "'[sshd]' in fail2ban_test_rendered_jail_local"
+      - "'enabled = false' in fail2ban_test_rendered_jail_local"
+    quiet: true
+  vars:
+    fail2ban_test_rendered_jail_local: "{{ fail2ban_test_jail_local_content.content | b64decode }}"
+
+- name: Check Fail2Ban service status
+  ansible.builtin.command:
+    argv:
+      - "{{ fail2ban_client_command }}"
+      - status
+  register: fail2ban_test_status
+  changed_when: false
+
+- name: Assert Fail2Ban client reports status
+  ansible.builtin.assert:
+    that:
+      - "'Status' in fail2ban_test_status.stdout"
+    quiet: true

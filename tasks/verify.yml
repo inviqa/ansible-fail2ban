@@ -1,0 +1,17 @@
+---
+- name: Check fail2ban-client command
+  ansible.builtin.command:
+    argv:
+      - "{{ fail2ban_client_command }}"
+      - --version
+  register: fail2ban_client_version
+  changed_when: false
+
+- name: Check Fail2Ban service status
+  ansible.builtin.command:
+    argv:
+      - "{{ fail2ban_client_command }}"
+      - status
+  register: fail2ban_client_status
+  changed_when: false
+  when: fail2ban_manage_service | bool

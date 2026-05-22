@@ -1,0 +1,43 @@
+---
+galaxy_info:
+  namespace: inviqa
+  role_name: fail2ban
+  author: "Marco Massari Calderone <marco.massari-calder@inviqa.com>"
+  description: "Install and configure Fail2Ban on supported Linux systems"
+  company: "Inviqa UK Ltd"
+  license: MIT
+  min_ansible_version: "2.16"
+  platforms:
+    - name: EL
+      versions:
+        - "8"
+        - "9"
+        - "10"
+    - name: Debian
+      versions:
+        - bullseye
+        - bookworm
+        - trixie
+    - name: Fedora
+      versions:
+        - "40"
+        - "41"
+        - "42"
+        - "43"
+    - name: Ubuntu
+      versions:
+        - focal
+        - jammy
+        - noble
+        - resolute
+
+  galaxy_tags:
+    - ban
+    - fail2ban
+    - firewall
+    - hardening
+    - linux
+    - security
+    - system
+
+dependencies: []

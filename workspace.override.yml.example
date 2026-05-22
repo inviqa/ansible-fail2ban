@@ -1,0 +1,6 @@
+---
+# Copy this file to workspace.override.yml and fill local release values.
+# The override file is gitignored.
+
+attribute('ansible.galaxy.token'): ''
+attribute('github.api_token'): ''
